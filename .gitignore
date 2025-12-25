@@ -1,0 +1,19 @@
+# Plugin local settings (user-specific)
+.claude/*.local.md
+
+# Build artifacts (if users compile the examples)
+*.o
+*.elf
+*.bin
+*.lst
+build/
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

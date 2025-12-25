@@ -1,0 +1,19 @@
+{
+  "name": "openocd-spi-dump",
+  "version": "1.0.0",
+  "description": "Dump SPI flash/EEPROM through a microcontroller via OpenOCD, without external SPI programming hardware",
+  "author": {
+    "name": "Luke Jenkins"
+  },
+  "keywords": [
+    "openocd",
+    "spi",
+    "flash",
+    "eeprom",
+    "embedded",
+    "reverse-engineering",
+    "firmware",
+    "hardware"
+  ],
+  "license": "MIT"
+}
