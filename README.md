@@ -20,9 +20,26 @@ When reverse engineering embedded systems, you often need to dump SPI flash cont
 
 ## Prerequisites
 
-- OpenOCD installed and configured for your debug probe
-- SWD/JTAG connection to the target MCU
-- Target MCU has SPI flash/EEPROM connected to its SPI peripheral
+### Required Software
+
+| Tool | Purpose | Installation |
+|------|---------|--------------|
+| **OpenOCD** | Debug interface to target MCU | `brew install openocd` (macOS) or `apt install openocd` (Linux) |
+| **ARM GNU Toolchain** | Compile RAM-resident dumper | `brew install arm-none-eabi-gcc` or [ARM Downloads](https://developer.arm.com/downloads/-/gnu-rm) |
+| **netcat (nc)** | Shell scripts communicate with OpenOCD | Usually pre-installed on macOS/Linux |
+
+### Optional Tools
+
+| Tool | Purpose | Installation |
+|------|---------|--------------|
+| **xxd** | Dump verification script | Usually pre-installed (part of vim) |
+| **bc** | Dump verification calculations | `brew install bc` or `apt install bc` |
+
+### Hardware Requirements
+
+- SWD/JTAG debug probe (ST-Link, J-Link, CMSIS-DAP, etc.)
+- Working debug connection to target MCU via OpenOCD
+- Target MCU with SPI flash/EEPROM connected to its SPI peripheral
 
 ## Installation
 
