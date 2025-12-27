@@ -96,6 +96,69 @@ const uint32_t vectors[] = {
    resume
    ```
 
+### Code Stuck Polling SPI Status
+
+**Symptoms:**
+- PC shows address in SPI transfer function (e.g., 0x2000004a)
+- Status register never changes from the command value you wrote
+- Code appears to hang but doesn't fault
+- Different flash addresses all return the same data
+
+**Cause:** The dumper was started at the wrong address, skipping initialization. The `spi_init()` function never ran, so:
+- SPI peripheral is not configured
+- GPIO for chip select is not set up
+- Code is stuck waiting for SPI_SR_TDRE which never gets set
+
+**This commonly happens when you set PC to an arbitrary address instead of reading it from the vector table.**
+
+**Wrong approach:**
+```tcl
+# WRONG - hardcoded address skips initialization!
+load_image spi_dump.bin 0x20000000 bin
+reg pc 0x20000041
+resume
+```
+
+**Correct approach:**
+```tcl
+# RIGHT - read SP and PC from the loaded binary's vector table
+load_image spi_dump.bin 0x20000000 bin
+
+# Read Initial SP from offset 0x00
+mem2array sp_arr 32 0x20000000 1
+reg sp $sp_arr(0)
+
+# Read Reset Vector from offset 0x04 (includes Thumb bit)
+mem2array pc_arr 32 0x20000004 1
+reg pc $pc_arr(0)
+
+resume
+```
+
+**Or use the init_dumper.sh script which handles this automatically.**
+
+**Verification:**
+```tcl
+halt
+reg pc
+
+# WRONG - PC in spi_transfer function (stuck polling):
+# pc (/32): 0x2000004a
+
+# RIGHT - PC in main loop (ready for commands):
+# pc (/32): 0x20000120
+```
+
+**Debugging steps:**
+1. Halt the target
+2. Check PC - if it's in the 0x20000040-0x20000080 range, it's likely stuck in `spi_transfer()`
+3. Check SPI status register (SAM4S: 0x40008010, STM32: 0x40013008)
+4. Reload the binary and use proper initialization sequence
+
+**Note for different MCUs:** The address ranges shown assume SRAM at 0x20000000. For LPC1768, the SRAM base is 0x10000000, so adjust accordingly.
+
+---
+
 ### Watchdog Reset During Operation
 
 **Symptoms:**

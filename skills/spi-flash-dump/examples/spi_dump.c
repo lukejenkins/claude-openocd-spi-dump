@@ -94,6 +94,7 @@
 #define COMM_DEST_OFFSET        0x0C
 #define COMM_JEDEC_ID_OFFSET    0x10
 #define COMM_ERROR_OFFSET       0x14
+#define COMM_HEARTBEAT_OFFSET   0x18    /* Increments in main loop - proves code is running */
 
 /* Status Values */
 #define STATUS_IDLE     0x00000000
@@ -139,6 +140,7 @@
 #define COMM_DEST       REG32(COMM_BASE + COMM_DEST_OFFSET)
 #define COMM_JEDEC_ID   REG32(COMM_BASE + COMM_JEDEC_ID_OFFSET)
 #define COMM_ERROR      REG32(COMM_BASE + COMM_ERROR_OFFSET)
+#define COMM_HEARTBEAT  REG32(COMM_BASE + COMM_HEARTBEAT_OFFSET)
 
 #define SCB_VTOR_REG    REG32(SCB_VTOR)
 
@@ -255,6 +257,7 @@ void spi_dump_main(void) {
     COMM_STATUS = STATUS_IDLE;
     COMM_JEDEC_ID = 0;
     COMM_ERROR = 0;
+    COMM_HEARTBEAT = 0;
 
     /* Initialize SPI peripheral */
     spi_init();
@@ -262,6 +265,9 @@ void spi_dump_main(void) {
     /* Main command loop */
     while (1) {
         feed_watchdog();
+
+        /* Increment heartbeat - proves main loop is running */
+        COMM_HEARTBEAT++;
 
         cmd = COMM_STATUS;
 

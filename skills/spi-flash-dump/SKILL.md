@@ -102,10 +102,14 @@ Use fixed memory addresses for host-MCU communication:
 | +0x08 | SIZE | Bytes to read |
 | +0x0C | DEST | Destination buffer in SRAM |
 | +0x10 | JEDEC_ID | Result of ID read |
+| +0x14 | ERROR | Error code if STATUS=ERROR |
+| +0x18 | HEARTBEAT | Increments in main loop (proves code is running) |
 
 **Status values:** 0x00=Idle, 0x01=Busy, 0x02=Done, 0xDEADxxxx=Error
 
 **Commands:** 0x10=Read flash, 0x20=Get JEDEC ID, 0xFF=Exit
+
+**Heartbeat usage:** Read this value twice with a short delay between. If it changes, the main loop is executing. If stuck, the code is blocked (likely in SPI polling).
 
 ### Step 5: Write RAM-Resident Code
 
@@ -199,8 +203,10 @@ See `references/troubleshooting.md` for detailed solutions. Quick reference:
 |---------|--------------|-----------|
 | HardFault immediately | VTOR points to flash | Set SCB_VTOR = SRAM_BASE |
 | SPI hangs polling | Clock not running | Check SPI_MR PCS field |
+| Code stuck in spi_transfer | Wrong PC at start | Use init_dumper.sh to read PC from vector table |
 | JEDEC returns 0x000000 | CS not toggling | Check GPIO config |
 | JEDEC returns 0xFFFFFF | No flash response | Check wiring, mode, speed |
+| Heartbeat not incrementing | Code blocked | Check PC - if in 0x2000004x, restart properly |
 
 ## Adapting to New MCUs
 
@@ -224,10 +230,58 @@ The core algorithm remains the same—only register addresses change.
 ### Example Files
 
 Complete, working templates in `examples/`:
-- **`spi_dump.c`** - RAM-resident C source with vector table
-- **`spi_dump.ld`** - Linker script for SRAM execution
-- **`spi_dump.tcl`** - OpenOCD TCL commands
 
-### Workflow
+**Source code:**
+- **`spi_dump.c`** - RAM-resident C source with vector table and heartbeat
+- **`spi_dump.ld`** - Linker script for SRAM execution
+- **`spi_dump.tcl`** - OpenOCD TCL commands with JEDEC ID decoding
+
+**Automation scripts (MCU-agnostic):**
+- **`init_dumper.sh`** - Properly loads and initializes the dumper (reads SP/PC from vector table)
+- **`dump.sh`** - Automated flash dump with parameterized memory addresses
+- **`verify_dump.sh`** - Verifies dump integrity, detects stuck data lines
+
+### Typical Workflow
+
+**Quick start with shell scripts:**
+
+```bash
+# 1. Compile for your MCU (customize spi_dump.c first)
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -ffreestanding \
+    -nostdlib -T spi_dump.ld -o spi_dump.elf spi_dump.c
+arm-none-eabi-objcopy -O binary spi_dump.elf spi_dump.bin
+
+# 2. Initialize the dumper (reads vector table automatically)
+./init_dumper.sh spi_dump.bin
+
+# 3. Dump the flash
+./dump.sh firmware.bin 0x400000
+
+# 4. Verify the dump
+./verify_dump.sh firmware.bin 0x400000
+```
+
+**For LPC1768 (SRAM at 0x10000000):**
+```bash
+SRAM_BASE=0x10000000 ./init_dumper.sh spi_dump.bin
+SRAM_BASE=0x10000000 ./dump.sh firmware.bin 0x100000
+```
+
+**Important: Proper Initialization**
+
+The dumper MUST be started from its reset vector, not an arbitrary address. The `init_dumper.sh` script handles this automatically by reading SP and PC from the vector table:
+
+```tcl
+# WRONG - skips spi_init(), code will hang polling SPI
+reg pc 0x20000041
+resume
+
+# CORRECT - starts from reset vector, runs full initialization
+mem2array sp_arr 32 0x20000000 1
+reg sp $sp_arr(0)
+mem2array pc_arr 32 0x20000004 1
+reg pc $pc_arr(0)
+resume
+```
 
 For a guided interactive session, use the `/spi-dump` command which walks through the entire process step-by-step.
