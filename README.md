@@ -22,18 +22,18 @@ When reverse engineering embedded systems, you often need to dump SPI flash cont
 
 ### Required Software
 
-| Tool | Purpose | Installation |
-|------|---------|--------------|
-| **OpenOCD** | Debug interface to target MCU | `brew install openocd` (macOS) or `apt install openocd` (Linux) |
-| **ARM GNU Toolchain** | Compile RAM-resident dumper | `brew install arm-none-eabi-gcc` or [ARM Downloads](https://developer.arm.com/downloads/-/gnu-rm) |
-| **netcat (nc)** | Shell scripts communicate with OpenOCD | Usually pre-installed on macOS/Linux |
+| Tool                  | Purpose                                | Installation                                                                                      |
+|-----------------------|----------------------------------------|---------------------------------------------------------------------------------------------------|
+| **OpenOCD**           | Debug interface to target MCU          | `brew install openocd` (macOS) or `apt install openocd` (Linux)                                   |
+| **ARM GNU Toolchain** | Compile RAM-resident dumper.           | `brew install arm-none-eabi-gcc` or [ARM Downloads](https://developer.arm.com/downloads/-/gnu-rm) |
+| **netcat (nc)**       | Shell scripts communicate with OpenOCD | Usually pre-installed on macOS/Linux                                                              |
 
 ### Optional Tools
 
-| Tool | Purpose | Installation |
-|------|---------|--------------|
-| **xxd** | Dump verification script | Usually pre-installed (part of vim) |
-| **bc** | Dump verification calculations | `brew install bc` or `apt install bc` |
+| Tool    | Purpose                        | Installation                          |
+|---------|--------------------------------|---------------------------------------|
+| **xxd** | Dump verification script       | Usually pre-installed (part of vim)   |
+| **bc**  | Dump verification calculations | `brew install bc` or `apt install bc` |
 
 ### Hardware Requirements
 
@@ -55,6 +55,7 @@ claude --plugin-dir /path/to/claude-openocd-spi-dump
 ### Quick Start
 
 Just ask Claude about your scenario:
+
 - "I need to dump the SPI flash on this SAM4S board"
 - "How do I read the EEPROM through the MCU via OpenOCD?"
 - "Help me dump flash from this STM32 target"
@@ -62,11 +63,13 @@ Just ask Claude about your scenario:
 ### Guided Workflow
 
 Run the interactive command:
-```
+
+```bash
 /spi-dump
 ```
 
 This will guide you through:
+
 1. Identifying your MCU and SPI connections
 2. Verifying OpenOCD connectivity
 3. Generating the RAM-resident dumper code
@@ -75,16 +78,20 @@ This will guide you through:
 
 ## Supported MCU Families
 
-| Family | Example Parts | Status |
-|--------|--------------|--------|
-| SAM4S | ATSAM4S2A, ATSAM4S4A | Full support |
-| SAM3X | ATSAM3X8E (Arduino Due) | Full support |
-| STM32F1 | STM32F103 (Blue Pill) | Full support |
-| STM32F4 | STM32F407, STM32F411 | Full support |
-| nRF52 | nRF52832, nRF52840 | Full support |
-| LPC1768 | LPC1768 (mbed) | Full support |
+| Family  | Example Parts           | Status       |
+|---------|-------------------------|--------------|
+| SAM4S   | ATSAM4S2A, ATSAM4S4A    | Full support |
+| SAM3X   | ATSAM3X8E (Arduino Due) | Full support |
+| STM32F1 | STM32F103 (Blue Pill)   | Full support |
+| STM32F4 | STM32F407, STM32F411    | Full support |
+| nRF52   | nRF52832, nRF52840      | Full support |
+| LPC1768 | LPC1768 (mbed)          | Full support |
 
 Adding new MCUs is straightforward - see the skill documentation for guidance.
+
+## To-Do
+
+- [ ] Parameterize the max chunk size
 
 ## License
 
