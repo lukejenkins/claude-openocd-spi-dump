@@ -17,7 +17,7 @@
 
 set CODE_ADDR       0x20000000      ;# SRAM base where binary is loaded
 set BUFFER_ADDR     0x2000E000      ;# Read buffer location
-set BUFFER_SIZE     0x1000          ;# 4KB buffer
+set BUFFER_SIZE     0xDD0           ;# 3536 bytes (must not overlap stack at 0x2000FDD0+)
 set COMM_ADDR       0x2000FF00      ;# Communication area
 set FLASH_SIZE      0x400000        ;# 4MB flash (adjust for your chip)
 set BINARY_FILE     "spi_dump.bin"  ;# Path to compiled binary
